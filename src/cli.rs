@@ -45,8 +45,15 @@ pub struct InitArgs {
 
 #[derive(Subcommand)]
 pub enum TopicCommands {
-    Create { name: String },
+    Create {
+        #[arg(required=true, num_args= 1..)]
+        names: Vec<String>,
+    },
     List,
-    Info { name: String },
-    Delete { name: String },
+    Info {
+        name: String,
+    },
+    Delete {
+        name: String,
+    },
 }
