@@ -1228,7 +1228,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "pubsub-emulator-cli"
+name = "pse"
 version = "0.1.0"
 dependencies = [
  "anyhow",
