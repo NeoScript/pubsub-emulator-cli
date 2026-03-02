@@ -5,12 +5,12 @@ use clap::{Parser, Subcommand};
 pub struct Cli {
     #[command(subcommand)]
     pub commands: PubsubCommands,
-    #[arg(
-        long,
-        env("PUBSUB_EMULATOR_HOST"),
-        help = "address of pubsub emulator host [example: http://localhost:port]"
-    )]
-    pub host: String,
+    // #[arg(
+    //     long,
+    //     env("PUBSUB_EMULATOR_HOST"),
+    //     help = "address of pubsub emulator host [example: http://localhost:port]"
+    // )]
+    // pub host: String,
 }
 
 #[derive(Subcommand)]
@@ -47,6 +47,6 @@ pub struct InitArgs {
 pub enum TopicCommands {
     Create { name: String },
     List,
-    Info,
+    Info { name: String },
     Delete { name: String },
 }

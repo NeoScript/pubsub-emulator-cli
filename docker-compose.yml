@@ -1,5 +1,14 @@
 services:
   pubsub-emulator:
-    image: ghcr.io/neoscript/pubsub-emulator-lite:latest
+    image: thekevjames/gcloud-pubsub-emulator:latest
     ports:
-      - 8090:8090
+      - "8681:8681"
+    environment:
+        PUBSUB_PROJECT1: my-project,topic-1:topic-1-sub
+
+  pubsub-emulator-ui:
+    image: ghcr.io/neoscript/pubsub-emulator-ui:latest
+    ports:
+      - "7200:80"
+
+
