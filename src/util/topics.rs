@@ -1,6 +1,6 @@
 use crate::cli::TopicCommands;
 use anyhow::{Context, Result};
-use google_cloud_pubsub::{client::Client, topic::Topic};
+use gcloud_pubsub::{client::Client, topic::Topic};
 use tokio::task::JoinSet;
 
 pub async fn handle_topic_commands(cmd: &TopicCommands, client: &Client) -> Result<()> {

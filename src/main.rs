@@ -2,8 +2,8 @@ use clap::Parser;
 
 use anyhow::Result;
 use cli::Cli;
-use google_cloud_gax::conn::Environment;
-use google_cloud_pubsub::client::{Client as PubSubClient, ClientConfig};
+use gcloud_gax::conn::Environment;
+use gcloud_pubsub::client::{Client as PubSubClient, ClientConfig};
 
 mod cli;
 mod util;
