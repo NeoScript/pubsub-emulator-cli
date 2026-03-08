@@ -15,6 +15,7 @@ pub struct Cli {
 
 #[derive(Subcommand)]
 pub enum PubsubCommands {
+    /// A collection of helpful actions related to topics
     #[command(subcommand)]
     Topics(TopicCommands),
 
@@ -45,15 +46,17 @@ pub struct InitArgs {
 
 #[derive(Subcommand)]
 pub enum TopicCommands {
+    /// Attempts to create topics with the given names
+    /// If a topic can not be made an error message is output, however the remaining topics will be
+    /// attempted
     Create {
         #[arg(required=true, num_args= 1..)]
         names: Vec<String>,
     },
+    /// Lists the topics that are associated with the project
     List,
-    Info {
-        name: String,
-    },
-    Delete {
-        name: String,
-    },
+    /// Returns a topic's fully qualified name + list of subscriptions attached to topic
+    Info { name: String },
+    /// Attempts to delete a topic
+    Delete { name: String },
 }
