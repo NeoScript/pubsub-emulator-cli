@@ -1,4 +1,4 @@
-use clap::{Parser, Subcommand};
+use clap::{Args, Parser, Subcommand};
 
 #[derive(Parser)]
 #[command(version, about)]
@@ -19,8 +19,36 @@ pub enum PubsubCommands {
     #[command(subcommand)]
     Topics(TopicCommands),
 
+    /// add/delete/list config options
+    #[command(subcommand)]
+    Projects(ProjectCommands),
+
     #[command()]
     Init(InitArgs),
+}
+
+#[derive(Subcommand)]
+pub enum ProjectCommands {
+    Add(ProjectArgs),
+    Delete { name: String },
+    List,
+    SetActive { name: String },
+    GetActive,
+}
+
+#[derive(Args)]
+pub struct ProjectArgs {
+    #[arg(
+        long,
+        help = "{name} of the pubsub project in /projects/{name}/topics/example_topic"
+    )]
+    pub name: String,
+    #[arg(
+        long,
+        env = "PUBSUB_EMULATOR_HOST",
+        help = "the ip address and port where the pubsub emulator is running"
+    )]
+    pub host: String,
 }
 
 #[derive(Parser, Debug)]
