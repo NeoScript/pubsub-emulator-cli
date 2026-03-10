@@ -1303,6 +1303,7 @@ dependencies = [
  "clap",
  "confy",
  "gcloud-gax",
+ "gcloud-googleapis",
  "gcloud-pubsub",
  "serde",
  "tokio",

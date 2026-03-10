@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use clap::{Args, Parser, Subcommand};
 
 #[derive(Parser)]
@@ -72,6 +74,27 @@ pub struct InitArgs {
     pub timeout: u8,
 }
 
+#[derive(Clone, Debug)]
+pub struct PubSubAttribute {
+    pub key: String,
+    pub value: String,
+}
+
+impl FromStr for PubSubAttribute {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let (key, value) = s
+            .split_once('=')
+            .ok_or_else(|| format!("Failed to parse: {s}, missing '='"))?;
+
+        Ok(Self {
+            key: key.to_string(),
+            value: value.to_string(),
+        })
+    }
+}
+
 #[derive(Subcommand)]
 pub enum TopicCommands {
     /// Attempts to create topics with the given names
@@ -87,4 +110,14 @@ pub enum TopicCommands {
     Info { name: String },
     /// Attempts to delete a topic
     Delete { name: String },
+    /// Publish a message to the topic
+    Publish {
+        #[arg(required = true, num_args = 1)]
+        topic_id: String,
+        #[arg(required = true, num_args = 1)]
+        message: String,
+
+        #[arg(long, value_delimiter = ',', value_name = "KEY=VALUE")]
+        attributes: Option<Vec<PubSubAttribute>>,
+    },
 }

@@ -1,51 +1,21 @@
-use std::collections::HashMap;
-
 use clap::Parser;
-use serde::{Deserialize, Serialize};
 
-use anyhow::{Context, Result};
+use anyhow::Result;
 use cli::Cli;
 use gcloud_gax::conn::Environment;
 use gcloud_pubsub::client::{Client as PubSubClient, ClientConfig};
 
 mod cli;
+mod config;
 mod util;
 
 use crate::cli::PubsubCommands;
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct AppConfig {
-    active_project: String,
-
-    /// mapping of project_id -> host_address (without http://)
-    projects: HashMap<String, String>,
-}
-
-impl Default for AppConfig {
-    fn default() -> Self {
-        Self {
-            active_project: "my-project".to_string(),
-            projects: HashMap::from([("my-project".to_string(), "localhost:8681".to_string())]),
-        }
-    }
-}
-
-impl AppConfig {
-    fn get_host(&self, project: &str) -> Result<String> {
-        let host = self
-            .projects
-            .get(project)
-            .with_context(|| format!("Project's address not found: {}", project))?;
-
-        Ok(host.to_string())
-    }
-}
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<()> {
     let conf_path = confy::get_configuration_file_path("pubsub-emulator-cli", "config")?;
     println!("loading configuration from: {:?}", conf_path);
-    let conf: AppConfig = confy::load("pubsub-emulator-cli", "config")?;
+    let conf: config::AppConfig = confy::load("pubsub-emulator-cli", "config")?;
 
     let project_id = &conf.active_project;
     let host = conf.get_host(project_id)?;

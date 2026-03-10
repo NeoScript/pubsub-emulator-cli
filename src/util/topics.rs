@@ -1,5 +1,8 @@
-use crate::cli::TopicCommands;
+use std::collections::HashMap;
+
+use crate::cli::{PubSubAttribute, TopicCommands};
 use anyhow::{Context, Result};
+use gcloud_googleapis::pubsub::v1::PubsubMessage;
 use gcloud_pubsub::{client::Client, topic::Topic};
 use tokio::task::JoinSet;
 
@@ -9,6 +12,11 @@ pub async fn handle_topic_commands(cmd: &TopicCommands, client: &Client) -> Resu
         TopicCommands::List => list_topics(client).await?,
         TopicCommands::Info { name } => get_topic_info(name, client).await?,
         TopicCommands::Delete { name } => delete_topic(name, client).await?,
+        TopicCommands::Publish {
+            topic_id,
+            message,
+            attributes,
+        } => publish_message(topic_id, message, attributes, client).await?,
     };
     Ok(())
 }
@@ -85,5 +93,32 @@ async fn delete_topic(name: &str, client: &Client) -> Result<()> {
     topic.delete(None).await.context("failed to delete topic")?;
 
     println!("topic deleted: {}", topic_name);
+    Ok(())
+}
+
+async fn publish_message(
+    topic_id: &str,
+    message: &str,
+    attributes: &Option<Vec<PubSubAttribute>>,
+    client: &Client,
+) -> Result<()> {
+    let topic = client.topic(topic_id);
+
+    let mut attrs_to_send = HashMap::new();
+    if let Some(attrs) = attributes {
+        attrs.iter().for_each(|a| {
+            attrs_to_send.insert(a.key.clone(), a.value.clone());
+        });
+    }
+    let message = PubsubMessage {
+        data: message.into(),
+        attributes: attrs_to_send,
+        ..Default::default()
+    };
+    println!("{:?}", message);
+    let publisher = topic.new_publisher(None);
+    let awaiter = publisher.publish_blocking(message);
+    let result = awaiter.get().await.context("failed to publish")?;
+    println!("received: {result} after publish");
     Ok(())
 }

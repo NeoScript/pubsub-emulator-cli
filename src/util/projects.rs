@@ -1,5 +1,5 @@
-use crate::AppConfig;
 use crate::cli::{ProjectArgs, ProjectCommands};
+use crate::config::AppConfig;
 use anyhow::{Context, Result};
 
 pub async fn handle_project_commands(cmd: &ProjectCommands, config: AppConfig) -> Result<()> {
