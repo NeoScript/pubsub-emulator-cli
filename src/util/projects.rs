@@ -57,10 +57,10 @@ fn get_active(config: &AppConfig) -> Result<()> {
 }
 
 fn set_active(project: &str, mut config: AppConfig) -> Result<()> {
-    config
-        .projects
-        .get(project)
-        .context("Failed to determine host for project: {project}")?;
+    let host = config.get_host(project)?;
+
     config.active_project = project.to_string();
+    confy::store("pubsub-emulator-cli", "config", config).context("Failed to save config file")?;
+    println!("Updated active project: {} @ {}", project, host);
     Ok(())
 }
