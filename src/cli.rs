@@ -117,6 +117,7 @@ pub enum TopicCommands {
         #[arg(required = true, num_args = 1)]
         message: String,
 
+        /// pubsub attributes to attach to the message, split by a comma if you need multiple
         #[arg(long, value_delimiter = ',', value_name = "KEY=VALUE")]
         attributes: Option<Vec<PubSubAttribute>>,
     },
