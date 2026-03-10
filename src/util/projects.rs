@@ -46,10 +46,7 @@ fn list_projects(config: &AppConfig) -> Result<()> {
 
 fn get_active(config: &AppConfig) -> Result<()> {
     let project_name = &config.active_project;
-    let project_host = config
-        .projects
-        .get(project_name)
-        .context("Failed to determine host for active project: {project_name}")?;
+    let project_host = config.get_host(project_name)?;
 
     println!("active project: {} @ {}", project_name, project_host);
 
