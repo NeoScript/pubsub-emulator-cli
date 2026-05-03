@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::time::Duration;
 
 use anyhow::{Context, Result};
 use gcloud_pubsub::client::Client;
@@ -37,11 +38,13 @@ pub async fn pull_messages(
     client: &Client,
     sub_name: &str,
     max_messages: i32,
+    timeout_secs: u64,
 ) -> Result<Vec<PulledMessage>> {
     let sub = client.subscription(sub_name);
-    let messages = sub
-        .pull(max_messages, None)
+    let pull_fut = sub.pull(max_messages, None);
+    let messages = tokio::time::timeout(Duration::from_secs(timeout_secs), pull_fut)
         .await
+        .with_context(|| format!("pull timed out after {timeout_secs}s on: {sub_name}"))?
         .with_context(|| format!("failed to pull messages from: {sub_name}"))?;
 
     Ok(messages

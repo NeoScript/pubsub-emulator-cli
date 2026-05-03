@@ -21,9 +21,15 @@ pub struct PublishForm {
 pub struct PullForm {
     #[serde(default = "default_max_messages")]
     pub max_messages: i32,
+    #[serde(default = "default_timeout_secs")]
+    pub timeout_secs: u64,
 }
 
 fn default_max_messages() -> i32 {
+    10
+}
+
+fn default_timeout_secs() -> u64 {
     10
 }
 
@@ -65,7 +71,7 @@ pub async fn pull_messages(
         Err(e) => return render_toast(&state, &format!("Client error: {e}"), true),
     };
 
-    match crate::services::subscriptions::pull_messages(&client, &subscription, form.max_messages).await {
+    match crate::services::subscriptions::pull_messages(&client, &subscription, form.max_messages, form.timeout_secs).await {
         Ok(messages) => {
             let tmpl = state.jinja.get_template("partials/message_card.html").unwrap();
             let rendered: Vec<String> = messages
