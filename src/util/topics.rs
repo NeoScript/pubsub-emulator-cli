@@ -1,9 +1,9 @@
 use std::collections::HashMap;
 
 use crate::cli::{PubSubAttribute, TopicCommands};
-use anyhow::{Context, Result};
-use gcloud_googleapis::pubsub::v1::PubsubMessage;
-use gcloud_pubsub::{client::Client, topic::Topic};
+use crate::services;
+use anyhow::Result;
+use gcloud_pubsub::client::Client;
 use tokio::task::JoinSet;
 
 pub async fn handle_topic_commands(cmd: &TopicCommands, client: &Client) -> Result<()> {
@@ -28,15 +28,7 @@ async fn create_topics(names: &[String], client: &Client) -> Result<()> {
         let client = client.clone();
         let topic_name = n.clone();
 
-        set.spawn(async move {
-            let topic = client.topic(&topic_name);
-            let topic_id = topic.fully_qualified_name();
-            topic
-                .create(None, None)
-                .await
-                .with_context(|| format!("failed to create topic: {}", topic_id))
-                .map(|_| topic_id.to_string())
-        });
+        set.spawn(async move { services::topics::create_topic(&client, &topic_name).await });
     });
 
     while let Some(task_result) = set.join_next().await {
@@ -52,34 +44,25 @@ async fn create_topics(names: &[String], client: &Client) -> Result<()> {
 }
 
 async fn list_topics(client: &Client) -> Result<()> {
-    let topic_list = client
-        .get_topics(None)
-        .await
-        .context("failed to get topics")?;
-
-    topic_list.iter().for_each(|n| {
+    let topics = services::topics::list_topics(client).await?;
+    topics.iter().for_each(|n| {
         println!("{}", n);
     });
-
     Ok(())
 }
 
 async fn get_topic_info(name: &str, client: &Client) -> Result<()> {
-    let topic: Topic = client.topic(name);
+    let topic = client.topic(name);
     let topic_name = topic.fully_qualified_name();
     println!("topic: {}", topic_name);
 
-    let subscriptions = topic
-        .subscriptions(None)
-        .await
-        .context("failed to get subscriptions")?;
+    let subscriptions = services::topics::get_topic_subscriptions(client, name).await?;
 
     if subscriptions.is_empty() {
         println!("no subscriptions found");
     } else {
         subscriptions.iter().for_each(|s| {
-            let sub_name = s.fully_qualified_name();
-            println!("{}", sub_name);
+            println!("{}", s);
         });
     }
 
@@ -89,9 +72,7 @@ async fn get_topic_info(name: &str, client: &Client) -> Result<()> {
 async fn delete_topic(name: &str, client: &Client) -> Result<()> {
     let topic = client.topic(name);
     let topic_name = topic.fully_qualified_name();
-
-    topic.delete(None).await.context("failed to delete topic")?;
-
+    services::topics::delete_topic(client, name).await?;
     println!("topic deleted: {}", topic_name);
     Ok(())
 }
@@ -102,23 +83,15 @@ async fn publish_message(
     attributes: &Option<Vec<PubSubAttribute>>,
     client: &Client,
 ) -> Result<()> {
-    let topic = client.topic(topic_id);
-
     let mut attrs_to_send = HashMap::new();
     if let Some(attrs) = attributes {
         attrs.iter().for_each(|a| {
             attrs_to_send.insert(a.key.clone(), a.value.clone());
         });
     }
-    let message = PubsubMessage {
-        data: message.into(),
-        attributes: attrs_to_send,
-        ..Default::default()
-    };
-    println!("{:?}", message);
-    let publisher = topic.new_publisher(None);
-    let awaiter = publisher.publish_blocking(message);
-    let result = awaiter.get().await.context("failed to publish")?;
+    println!("publishing to topic: {}", topic_id);
+    let result =
+        services::topics::publish_message(client, topic_id, message, attrs_to_send).await?;
     println!("received: {result} after publish");
     Ok(())
 }
