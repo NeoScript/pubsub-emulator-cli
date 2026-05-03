@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "embedded",
+  "dolt_database": "pubsub_emulator_cli",
+  "project_id": "98c2faa6-ca0e-48ea-813a-8fbf80f12f4b"
+}
