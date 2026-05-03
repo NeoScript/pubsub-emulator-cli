@@ -41,16 +41,16 @@
           </tr>
         </thead>
         <tbody id="project-list">
-          {% for project in projects %}
+          {% for project_id, host in projects %}
           <tr class="hover group">
             <td>
-              <span class="font-mono font-medium text-sm">{{ project }}</span>
+              <span class="font-mono font-medium text-sm">{{ project_id }}</span>
             </td>
             <td>
-              <span class="text-base-content/60 text-sm font-mono">—</span>
+              <span class="text-base-content/60 text-sm font-mono">{{ host }}</span>
             </td>
             <td class="text-right">
-              <a href="/project?project={{ project }}"
+              <a href="/project?project={{ project_id }}"
                  class="btn btn-primary btn-xs gap-1">
                 Open
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">

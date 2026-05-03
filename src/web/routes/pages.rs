@@ -23,7 +23,15 @@ fn default_host() -> String {
 }
 
 pub async fn index(State(state): State<AppState>) -> Html<String> {
-    let projects = state.project_ids().await;
+    let config = state.config.read().await;
+    let projects: Vec<(String, String)> = {
+        let mut entries: Vec<_> = config.projects.iter()
+            .map(|(id, host)| (id.clone(), host.clone()))
+            .collect();
+        entries.sort_by(|a, b| a.0.cmp(&b.0));
+        entries
+    };
+    drop(config);
     let tmpl = state.jinja.get_template("index.html").unwrap();
     Html(tmpl.render(context! { projects => &projects }).unwrap())
 }
