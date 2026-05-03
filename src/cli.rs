@@ -27,6 +27,20 @@ pub enum PubsubCommands {
 
     #[command()]
     Init(InitArgs),
+
+    /// Start the web UI server
+    Serve(ServeArgs),
+}
+
+#[derive(Parser, Debug)]
+pub struct ServeArgs {
+    /// Port to listen on
+    #[arg(short, long, default_value = "7200", env = "PSE_PORT")]
+    pub port: u16,
+
+    /// Bind address
+    #[arg(short, long, default_value = "0.0.0.0", env = "PSE_BIND")]
+    pub bind: String,
 }
 
 #[derive(Subcommand)]
