@@ -24,6 +24,7 @@ pub async fn start(config: AppConfig, args: ServeArgs) -> anyhow::Result<()> {
         .route("/", get(routes::pages::index))
         .route("/project", get(routes::pages::project_page))
         .route("/projects", post(routes::pages::add_project))
+        .route("/projects/{project}/delete", delete(routes::pages::delete_project))
         .route(
             "/projects/{project}/topics",
             get(routes::topics::list_topics).post(routes::topics::create_topic),

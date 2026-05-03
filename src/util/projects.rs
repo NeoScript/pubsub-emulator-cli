@@ -30,6 +30,7 @@ fn delete_project(project: &str, mut config: AppConfig) -> Result<()> {
         .remove_entry(project)
         .context("Failed to find project: {project}")?;
 
+    confy::store("pubsub-emulator-cli", "config", config).context("saving configuration file")?;
     println!("Removed: {} @ {}", &removed_project, &removed_host);
     Ok(())
 }
