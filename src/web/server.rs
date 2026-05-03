@@ -1,4 +1,4 @@
-use axum::routing::{delete, get, post, put};
+use axum::routing::{delete, get, post};
 use axum::Router;
 use tower_http::services::ServeDir;
 use tracing_subscriber::EnvFilter;
@@ -25,7 +25,6 @@ pub async fn start(config: AppConfig, args: ServeArgs) -> anyhow::Result<()> {
         .route("/project", get(routes::pages::project_page))
         .route("/projects", post(routes::pages::add_project))
         .route("/projects/{project}/delete", delete(routes::pages::delete_project))
-        .route("/projects/{project}/host", put(routes::pages::update_project_host))
         .route(
             "/projects/{project}/topics",
             get(routes::topics::list_topics).post(routes::topics::create_topic),
