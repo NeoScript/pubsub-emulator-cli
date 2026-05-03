@@ -30,7 +30,7 @@ pub async fn list_topics(
                 .collect();
             Html(tmpl.render(context! { topics => &short_names, project => &project }).unwrap())
         }
-        Err(e) => Html(tmpl.render(context! { topics => Vec::<String>::new(), project => &project, error => e.to_string() }).unwrap()),
+        Err(e) => Html(tmpl.render(context! { topics => Vec::<String>::new(), project => &project, error => format!("{e:#}") }).unwrap()),
     }
 }
 
@@ -41,12 +41,12 @@ pub async fn create_topic(
 ) -> Html<String> {
     let client = match state.client_for_project(&project).await {
         Ok(c) => c,
-        Err(e) => return render_toast(&state, &format!("Client error: {e}"), true),
+        Err(e) => return render_toast(&state, &format!("Client error: {e:#}"), true),
     };
 
     match crate::services::topics::create_topic(&client, &form.name).await {
         Ok(_) => list_topics(State(state), Path(project)).await,
-        Err(e) => render_toast(&state, &format!("Failed to create topic: {e}"), true),
+        Err(e) => render_toast(&state, &format!("Failed to create topic: {e:#}"), true),
     }
 }
 
@@ -56,12 +56,12 @@ pub async fn delete_topic(
 ) -> Html<String> {
     let client = match state.client_for_project(&project).await {
         Ok(c) => c,
-        Err(e) => return render_toast(&state, &format!("Client error: {e}"), true),
+        Err(e) => return render_toast(&state, &format!("Client error: {e:#}"), true),
     };
 
     match crate::services::topics::delete_topic(&client, &topic).await {
         Ok(_) => list_topics(State(state), Path(project)).await,
-        Err(e) => render_toast(&state, &format!("Failed to delete topic: {e}"), true),
+        Err(e) => render_toast(&state, &format!("Failed to delete topic: {e:#}"), true),
     }
 }
 

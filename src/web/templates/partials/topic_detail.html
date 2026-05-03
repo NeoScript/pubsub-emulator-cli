@@ -11,9 +11,16 @@
   </div>
 
   <!-- Tabs -->
-  <div role="tablist" class="tabs tabs-bordered mb-4">
-    <input type="radio" name="topic_tabs_{{ topic }}" role="tab" class="tab" aria-label="Subscriptions" checked>
-    <div role="tabpanel" class="tab-content pt-4 flex flex-col gap-4">
+  <div class="tabs tabs-lift">
+
+    <label class="tab">
+      <input type="radio" name="topic_tabs_{{ topic }}" checked="checked" />
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 me-2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/>
+      </svg>
+      Subscriptions
+    </label>
+    <div class="tab-content bg-base-100 border-base-300 p-6 flex flex-col gap-4">
 
       <!-- Subscription list -->
       <div id="subscription-list"
@@ -28,68 +35,71 @@
 
     </div>
 
-    <input type="radio" name="topic_tabs_{{ topic }}" role="tab" class="tab" aria-label="Publish">
-    <div role="tabpanel" class="tab-content pt-4">
+    <label class="tab">
+      <input type="radio" name="topic_tabs_{{ topic }}" />
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 me-2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"/>
+      </svg>
+      Publish
+    </label>
+    <div class="tab-content bg-base-100 border-base-300 p-6">
 
       <!-- Publish message form -->
-      <div class="card bg-base-100 shadow-sm border border-base-300">
-        <div class="card-body gap-4">
-          <div class="flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"/>
-            </svg>
-            <h3 class="font-semibold text-sm">Publish Message</h3>
-          </div>
-
-          <form id="publish-form-{{ topic }}"
-                hx-post="/projects/{{ project }}/topics/{{ topic }}/publish"
-                hx-target="#toast-container"
-                hx-swap="innerHTML"
-                hx-on::after-request="if(event.detail.successful) { this.reset(); document.getElementById('attr-rows-{{ topic }}').innerHTML = ''; }"
-                class="flex flex-col gap-3">
-
-            <div>
-              <label class="label py-0 mb-1">
-                <span class="label-text text-xs text-base-content/60 uppercase tracking-wider">Message body</span>
-              </label>
-              <textarea name="data"
-                        placeholder="Message payload (plain text or JSON)…"
-                        class="textarea textarea-bordered w-full font-mono text-sm leading-relaxed"
-                        rows="5"
-                        required></textarea>
-            </div>
-
-            <div>
-              <div class="flex items-center justify-between mb-2">
-                <span class="label-text text-xs text-base-content/60 uppercase tracking-wider">
-                  Attributes <span class="normal-case font-normal">(optional)</span>
-                </span>
-                <button type="button"
-                        class="btn btn-ghost btn-xs gap-1"
-                        onclick="addAttrRow('{{ topic }}')">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
-                  </svg>
-                  Add Attribute
-                </button>
-              </div>
-              <div id="attr-rows-{{ topic }}" class="flex flex-col gap-1.5"></div>
-            </div>
-
-            <div class="flex justify-end pt-1">
-              <button type="submit" class="btn btn-primary btn-sm gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"/>
-                </svg>
-                Publish
-              </button>
-            </div>
-          </form>
-        </div>
+      <div class="flex items-center gap-2 mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"/>
+        </svg>
+        <h3 class="font-semibold text-sm">Publish Message</h3>
       </div>
 
+      <form id="publish-form-{{ topic }}"
+            hx-post="/projects/{{ project }}/topics/{{ topic }}/publish"
+            hx-target="#toast-container"
+            hx-swap="beforeend"
+            hx-on::after-request="if(event.detail.successful) { this.reset(); document.getElementById('attr-rows-{{ topic }}').innerHTML = ''; }"
+            class="flex flex-col gap-3">
+
+        <div>
+          <label class="label py-0 mb-1">
+            <span class="text-xs text-base-content/60 uppercase tracking-wider">Message body</span>
+          </label>
+          <textarea name="data"
+                    placeholder="Message payload (plain text or JSON)…"
+                    class="textarea w-full font-mono text-sm leading-relaxed"
+                    rows="5"
+                    required></textarea>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs text-base-content/60 uppercase tracking-wider">
+              Attributes <span class="normal-case font-normal">(optional)</span>
+            </span>
+            <button type="button"
+                    class="btn btn-ghost btn-xs gap-1"
+                    onclick="addAttrRow('{{ topic }}')">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+              </svg>
+              Add Attribute
+            </button>
+          </div>
+          <div id="attr-rows-{{ topic }}" class="flex flex-col gap-1.5"></div>
+        </div>
+
+        <div class="flex justify-end pt-1">
+          <button type="submit" class="btn btn-primary btn-sm gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"/>
+            </svg>
+            Publish
+          </button>
+        </div>
+      </form>
+
     </div>
-  </div>
+
+  </div>{# /tabs #}
 
 </div>
 
@@ -97,9 +107,9 @@
 <template id="attr-row-tpl">
   <div class="attr-row grid grid-cols-[1fr_1fr_auto] gap-1.5 items-center">
     <input type="text" data-attr-key placeholder="Key"
-           class="input input-bordered input-sm font-mono text-xs">
+           class="input input-sm font-mono text-xs">
     <input type="text" data-attr-val placeholder="Value"
-           class="input input-bordered input-sm font-mono text-xs">
+           class="input input-sm font-mono text-xs">
     <button type="button" class="btn btn-ghost btn-xs text-error px-1.5"
             onclick="this.closest('.attr-row').remove()"
             title="Remove">

@@ -30,10 +30,11 @@
     </div>
     <button class="btn btn-ghost btn-xs opacity-0 group-hover:opacity-100 text-error shrink-0 h-5 min-h-0 px-1.5 ml-2"
             hx-delete="/projects/{{ project }}/subscriptions/{{ sub }}/delete"
-            hx-target="closest div.flex"
-            hx-swap="outerHTML"
+            hx-target="#toast-container"
+            hx-swap="beforeend"
             hx-confirm="Delete subscription '{{ sub }}'?"
-            onclick="event.preventDefault(); event.stopPropagation();"
+            hx-on::after-request="if(event.detail.successful) this.closest('div.flex').remove();"
+            onclick="event.stopPropagation();"
             title="Delete subscription">
       <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
@@ -50,7 +51,7 @@
       hx-swap="innerHTML"
       class="flex gap-1.5 mt-2">
   <input type="text" name="name" placeholder="New subscription name"
-         class="input input-bordered input-xs flex-1 font-mono text-xs" required>
+         class="input input-xs flex-1 font-mono text-xs" required>
   <button type="submit" class="btn btn-secondary btn-xs shrink-0 gap-1">
     <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
       <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>

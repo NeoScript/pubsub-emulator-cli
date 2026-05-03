@@ -7,7 +7,7 @@
 </div>
 {% endif %}
 
-<ul class="menu menu-sm p-0 gap-0.5">
+<ul class="menu menu-sm w-full p-0 gap-0.5">
 
   {% if topics is defined and topics | length == 0 and not error %}
   <li class="pointer-events-none select-none">
@@ -21,7 +21,7 @@
        hx-get="/projects/{{ project }}/topics/{{ topic }}/detail"
        hx-target="#detail-panel"
        hx-swap="innerHTML"
-       hx-on::after-request="document.querySelectorAll('.topic-item').forEach(el => el.classList.remove('active')); this.classList.add('active');">
+       hx-on::after-request="document.querySelectorAll('.topic-item').forEach(el => el.classList.remove('menu-active')); this.classList.add('menu-active');">
       <span class="truncate font-mono text-xs font-medium">{{ topic }}</span>
       <button class="btn btn-ghost btn-xs opacity-0 group-hover:opacity-100 text-error shrink-0 h-5 min-h-0 px-1"
               hx-delete="/projects/{{ project }}/topics/{{ topic }}/delete"
@@ -52,7 +52,7 @@
       <input type="text"
              name="name"
              placeholder="New topic…"
-             class="bg-transparent flex-1 text-xs font-mono outline-none min-w-0"
+             class="bg-transparent flex-1 text-xs font-mono outline-none min-w-0 border-none w-full"
              oninput="this.closest('form').querySelector('button[type=submit]').disabled = !this.value.trim();"
              autocomplete="off"
              required>

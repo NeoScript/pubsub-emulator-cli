@@ -1,8 +1,20 @@
 /* ============================================================
    PSE Web UI — Custom styles
-   DaisyUI v4 + Tailwind CSS loaded via CDN in templates.
+   DaisyUI v5 + @tailwindcss/browser@4 loaded via CDN.
    These are targeted overrides and structural helpers only.
    ============================================================ */
+
+/* ----------------------------------------------------------
+   Tabs: force inactive tab panels hidden.
+   @tailwindcss/browser@4's injected layer can override DaisyUI's
+   :has()-based tab visibility, so we reinforce it here.
+   ---------------------------------------------------------- */
+.tabs .tab-content {
+  display: none;
+}
+.tabs .tab:has(input:checked) + .tab-content {
+  display: block;
+}
 
 /* ----------------------------------------------------------
    Add-topic row: submit arrow fades in once input has text
@@ -12,20 +24,18 @@
 }
 
 /* ----------------------------------------------------------
-   Input & textarea text colour — DaisyUI v4 uses oklch(var(--bc))
-   for base-content. The .input component can render text too dim
-   in some themes; pin it explicitly so typed text is always at
-   full base-content strength and placeholders are clearly secondary.
+   Input & textarea text colour
+   DaisyUI v5 CSS variables are full OKLCH values; use
+   color-mix() for opacity variants.
    ---------------------------------------------------------- */
 .input,
 .textarea {
-  color: oklch(var(--bc));
+  color: var(--color-base-content);
 }
 .input::placeholder,
 .textarea::placeholder {
-  color: oklch(var(--bc) / 0.3);
+  color: color-mix(in oklch, var(--color-base-content) 30%, transparent);
 }
-
 
 /* Sidebar topic list fills remaining space, scroll within */
 #topic-list {
@@ -41,9 +51,6 @@
 
 /* ----------------------------------------------------------
    Monospace resource identifiers
-   All Pub/Sub resource names (topic names, subscription names,
-   project IDs, message IDs, ack IDs) use font-mono for
-   readability and to distinguish them from prose.
    ---------------------------------------------------------- */
 .resource-id {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
@@ -52,19 +59,16 @@
 }
 
 /* ----------------------------------------------------------
-   Active topic / subscription in sidebar
-   DaisyUI .menu .active already applies bg-primary styling.
-   Override text color to ensure legibility in both themes.
+   Active topic in sidebar (menu-active in DaisyUI v5)
    ---------------------------------------------------------- */
-.menu li a.active {
-  background-color: hsl(var(--p) / 0.15);
-  color: hsl(var(--p));
+.menu li a.menu-active {
+  background-color: color-mix(in oklch, var(--color-primary) 15%, transparent);
+  color: var(--color-primary);
   font-weight: 600;
 }
 
 /* ----------------------------------------------------------
-   HTMX loading indicator — hidden by default, shown during
-   in-flight requests via .htmx-request class on the parent.
+   HTMX loading indicator
    ---------------------------------------------------------- */
 .htmx-indicator {
   display: none;
@@ -82,8 +86,7 @@
 }
 
 /* ----------------------------------------------------------
-   Message payload <pre> block — long lines wrap, no horizontal
-   scroll on narrow viewports.
+   Message payload <pre> block
    ---------------------------------------------------------- */
 #pulled-messages pre {
   white-space: pre-wrap;
@@ -91,8 +94,7 @@
 }
 
 /* ----------------------------------------------------------
-   Toast fade-out — works with the JS opacity transition
-   added by toast.html's inline script.
+   Toast fade-in animation
    ---------------------------------------------------------- */
 #toast-container .alert {
   animation: toast-in 0.2s ease;
@@ -110,16 +112,8 @@
 }
 
 /* ----------------------------------------------------------
-   DaisyUI tab panels inside detail view — allow overflow
-   scroll independently of the outer panel.
-   ---------------------------------------------------------- */
-.tab-content {
-  overflow-y: auto;
-}
-
-/* ----------------------------------------------------------
-   Subscription list item: prevent the delete button from
-   triggering the parent HTMX click handler.
+   Subscription list: delete button must receive pointer events
+   independently of the parent HTMX click handler.
    ---------------------------------------------------------- */
 #subscription-list button[hx-delete] {
   pointer-events: all;

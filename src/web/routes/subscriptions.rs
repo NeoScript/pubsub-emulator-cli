@@ -1,5 +1,6 @@
 use axum::extract::{Path, Query, State};
-use axum::response::Html;
+use axum::http::HeaderMap;
+use axum::response::{Html, IntoResponse, Response};
 use axum::Form;
 use minijinja::context;
 use serde::Deserialize;
@@ -38,7 +39,7 @@ pub async fn list_subscriptions(
             subscriptions => Vec::<String>::new(),
             topic => &topic,
             project => &project,
-            error => e.to_string(),
+            error => format!("{e:#}"),
         }).unwrap()),
     }
 }
@@ -47,15 +48,15 @@ pub async fn create_subscription(
     State(state): State<AppState>,
     Path((project, topic)): Path<(String, String)>,
     Form(form): Form<CreateSubForm>,
-) -> Html<String> {
+) -> Response {
     let client = match state.client_for_project(&project).await {
         Ok(c) => c,
-        Err(e) => return render_toast(&state, &format!("Client error: {e}"), true),
+        Err(e) => return retarget_toast(&state, &format!("Client error: {e:#}"), true),
     };
 
     match crate::services::subscriptions::create_subscription(&client, &topic, &form.name).await {
-        Ok(_) => list_subscriptions(State(state), Path((project, topic))).await,
-        Err(e) => render_toast(&state, &format!("Failed to create subscription: {e}"), true),
+        Ok(_) => list_subscriptions(State(state), Path((project, topic))).await.into_response(),
+        Err(e) => retarget_toast(&state, &format!("Failed to create subscription: {e:#}"), true),
     }
 }
 
@@ -65,12 +66,12 @@ pub async fn delete_subscription(
 ) -> Html<String> {
     let client = match state.client_for_project(&project).await {
         Ok(c) => c,
-        Err(e) => return render_toast(&state, &format!("Client error: {e}"), true),
+        Err(e) => return render_toast(&state, &format!("Client error: {e:#}"), true),
     };
 
     match crate::services::subscriptions::delete_subscription(&client, &subscription).await {
         Ok(_) => render_toast(&state, &format!("Deleted subscription: {subscription}"), false),
-        Err(e) => render_toast(&state, &format!("Failed to delete: {e}"), true),
+        Err(e) => render_toast(&state, &format!("Failed to delete: {e:#}"), true),
     }
 }
 
@@ -92,6 +93,13 @@ pub async fn subscription_detail(
         project => &project,
         topic => &query.topic,
     }).unwrap())
+}
+
+fn retarget_toast(state: &AppState, message: &str, is_error: bool) -> Response {
+    let mut headers = HeaderMap::new();
+    headers.insert("HX-Retarget", "#toast-container".parse().unwrap());
+    headers.insert("HX-Reswap", "beforeend".parse().unwrap());
+    (headers, render_toast(state, message, is_error)).into_response()
 }
 
 fn render_toast(state: &AppState, message: &str, is_error: bool) -> Html<String> {

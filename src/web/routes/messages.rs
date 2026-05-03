@@ -43,7 +43,7 @@ pub async fn publish_message(
 ) -> Html<String> {
     let client = match state.client_for_project(&project).await {
         Ok(c) => c,
-        Err(e) => return render_toast(&state, &format!("Client error: {e}"), true),
+        Err(e) => return render_toast(&state, &format!("Client error: {e:#}"), true),
     };
 
     let mut attributes = HashMap::new();
@@ -58,7 +58,7 @@ pub async fn publish_message(
 
     match crate::services::topics::publish_message(&client, &topic, &form.data, attributes).await {
         Ok(msg_id) => render_toast(&state, &format!("Published message: {msg_id}"), false),
-        Err(e) => render_toast(&state, &format!("Publish failed: {e}"), true),
+        Err(e) => render_toast(&state, &format!("Publish failed: {e:#}"), true),
     }
 }
 
@@ -69,7 +69,7 @@ pub async fn pull_messages(
 ) -> Html<String> {
     let client = match state.client_for_project(&project).await {
         Ok(c) => c,
-        Err(e) => return render_toast(&state, &format!("Client error: {e}"), true),
+        Err(e) => return render_toast(&state, &format!("Client error: {e:#}"), true),
     };
 
     match crate::services::subscriptions::pull_messages(&client, &subscription, form.max_messages, form.timeout_secs).await {
@@ -116,7 +116,7 @@ pub async fn pull_messages(
                 Html(format!("{}\n<div class=\"flex flex-col gap-3\">{}</div>", header, rendered.join("\n")))
             }
         }
-        Err(e) => render_toast(&state, &format!("Pull failed: {e}"), true),
+        Err(e) => render_toast(&state, &format!("Pull failed: {e:#}"), true),
     }
 }
 
@@ -127,12 +127,12 @@ pub async fn ack_message(
 ) -> Html<String> {
     let client = match state.client_for_project(&project).await {
         Ok(c) => c,
-        Err(e) => return render_toast(&state, &format!("Client error: {e}"), true),
+        Err(e) => return render_toast(&state, &format!("Client error: {e:#}"), true),
     };
 
     match crate::services::subscriptions::acknowledge(&client, &subscription, vec![form.ack_id]).await {
         Ok(_) => Html(String::new()),
-        Err(e) => render_toast(&state, &format!("Ack failed: {e}"), true),
+        Err(e) => render_toast(&state, &format!("Ack failed: {e:#}"), true),
     }
 }
 

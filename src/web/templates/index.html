@@ -30,7 +30,7 @@
           </tr>
           {% endif %}
           {% for project_id, host in projects %}
-          <tr class="hover group">
+          <tr class="hover:bg-base-300 group">
             <td class="pl-4 pr-0">
               <span hx-get="/projects/{{ project_id }}/ping"
                     hx-trigger="load"
@@ -80,7 +80,7 @@
               <input id="new-project-id"
                      type="text"
                      placeholder="project-id"
-                     class="input input-bordered input-xs w-full font-mono"
+                     class="input input-xs w-full font-mono"
                      oninput="document.getElementById('add-project-btn').disabled = !this.value.trim();"
                      autocomplete="off">
             </td>
@@ -88,7 +88,7 @@
               <input id="new-project-host"
                      type="text"
                      placeholder="localhost:8681"
-                     class="input input-bordered input-xs w-full font-mono"
+                     class="input input-xs w-full font-mono"
                      value="">
             </td>
             <td class="py-2 pr-4 text-right">
