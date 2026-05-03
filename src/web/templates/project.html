@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}PSE - {{ project }}{% endblock %}
+{% block content %}
+<div class="flex gap-4 h-[calc(100vh-10rem)]">
+  <div class="w-1/4 bg-base-100 rounded-lg p-4 overflow-y-auto">
+    <h2 class="text-lg font-bold mb-2">Topics</h2>
+    <div id="topic-list"
+         hx-get="/projects/{{ project }}/topics"
+         hx-trigger="load"
+         hx-swap="innerHTML">
+      <span class="loading loading-spinner"></span>
+    </div>
+  </div>
+  <div id="detail-panel" class="flex-1 bg-base-100 rounded-lg p-4 overflow-y-auto">
+    <p class="text-base-content/50">Select a topic to get started</p>
+  </div>
+</div>
+{% endblock %}

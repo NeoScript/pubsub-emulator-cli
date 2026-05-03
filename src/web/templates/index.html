@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}PSE - Projects{% endblock %}
+{% block content %}
+<div class="flex flex-col items-center gap-6 mt-8">
+  <h1 class="text-3xl font-bold">Projects</h1>
+  <div id="project-list" class="flex flex-wrap gap-4 justify-center">
+    {% for project in projects %}
+    <a href="/project?project={{ project }}" class="card bg-base-100 shadow-md hover:shadow-xl transition-shadow cursor-pointer w-64">
+      <div class="card-body">
+        <h2 class="card-title">{{ project }}</h2>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  <form hx-post="/projects" hx-target="#project-list" hx-swap="beforeend" class="join">
+    <input type="text" name="project_id" placeholder="New project ID"
+           class="input input-bordered join-item" required>
+    <button type="submit" class="btn btn-primary join-item">Add</button>
+  </form>
+</div>
+{% endblock %}
