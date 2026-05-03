@@ -5,13 +5,27 @@
    ============================================================ */
 
 /* ----------------------------------------------------------
-   Workspace layout
-   The project workspace fills the viewport below the navbar
-   and the breadcrumb bar. navbar ~64px + breadcrumb ~45px = ~109px.
+   Add-topic row: submit arrow fades in once input has text
    ---------------------------------------------------------- */
-.workspace-height {
-  height: calc(100vh - 109px);
+#topic-list form button[type=submit]:not([disabled]) {
+  opacity: 1;
 }
+
+/* ----------------------------------------------------------
+   Input & textarea text colour — DaisyUI v4 uses oklch(var(--bc))
+   for base-content. The .input component can render text too dim
+   in some themes; pin it explicitly so typed text is always at
+   full base-content strength and placeholders are clearly secondary.
+   ---------------------------------------------------------- */
+.input,
+.textarea {
+  color: oklch(var(--bc));
+}
+.input::placeholder,
+.textarea::placeholder {
+  color: oklch(var(--bc) / 0.3);
+}
+
 
 /* Sidebar topic list fills remaining space, scroll within */
 #topic-list {

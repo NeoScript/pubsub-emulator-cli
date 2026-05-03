@@ -3,6 +3,8 @@ use axum::response::Html;
 use axum::Form;
 use minijinja::context;
 use serde::Deserialize;
+use std::time::Duration;
+use tokio::net::TcpStream;
 
 use crate::web::state::AppState;
 
@@ -32,7 +34,8 @@ pub async fn index(State(state): State<AppState>) -> Html<String> {
         entries
     };
     drop(config);
-    let tmpl = state.jinja.get_template("index.html").unwrap();
+    let _env = state.jinja.acquire_env().unwrap();
+    let tmpl = _env.get_template("index.html").unwrap();
     Html(tmpl.render(context! { projects => &projects }).unwrap())
 }
 
@@ -42,7 +45,8 @@ pub async fn project_page(
 ) -> Html<String> {
     let config = state.config.read().await;
     let host = config.get_host(&params.project).unwrap_or_default();
-    let tmpl = state.jinja.get_template("project.html").unwrap();
+    let _env = state.jinja.acquire_env().unwrap();
+    let tmpl = _env.get_template("project.html").unwrap();
     Html(tmpl
         .render(context! {
             project => &params.project,
@@ -64,11 +68,20 @@ pub async fn add_project(
 
     Html(format!(
         r#"<tr class="hover group">
+  <td class="pl-4 pr-0">
+    <span hx-get="/projects/{0}/ping"
+          hx-trigger="load"
+          hx-swap="outerHTML">
+      <span class="inline-flex items-center justify-center w-5 h-5">
+        <span class="loading loading-ring loading-xs text-base-content/20"></span>
+      </span>
+    </span>
+  </td>
   <td>
     <span class="font-mono font-medium text-sm">{0}</span>
   </td>
   <td>
-    <span class="text-base-content/60 text-sm font-mono">{1}</span>
+    <span class="text-sm font-mono">{1}</span>
   </td>
   <td class="text-right">
     <div class="flex items-center justify-end gap-2">
@@ -94,8 +107,46 @@ pub async fn add_project(
     ))
 }
 
-pub async fn delete_project(
+pub async fn ping_project(
     State(state): State<AppState>,
+    Path(project_id): Path<String>,
+) -> Html<String> {
+    let host = {
+        let config = state.config.read().await;
+        config.projects.get(&project_id).cloned()
+    };
+
+    let Some(host) = host else {
+        return Html(ping_indicator("unknown", "Project not found"));
+    };
+
+    let result = tokio::time::timeout(
+        Duration::from_secs(2),
+        TcpStream::connect(&host),
+    ).await;
+
+    match result {
+        Ok(Ok(_))  => Html(ping_indicator("online",   &format!("{host} — reachable"))),
+        Ok(Err(_)) => Html(ping_indicator("offline",  &format!("{host} — unreachable"))),
+        Err(_)     => Html(ping_indicator("timeout",  &format!("{host} — timed out"))),
+    }
+}
+
+fn ping_indicator(status: &str, title: &str) -> String {
+    let (color, pulse) = match status {
+        "online"  => ("bg-success", "animate-pulse"),
+        "offline" => ("bg-error",   ""),
+        "timeout" => ("bg-warning", ""),
+        _         => ("bg-base-300",""),
+    };
+    format!(
+        r#"<span class="inline-flex items-center justify-center w-5 h-5" title="{title}">
+  <span class="w-2 h-2 rounded-full {color} {pulse}"></span>
+</span>"#
+    )
+}
+
+pub async fn delete_project(    State(state): State<AppState>,
     Path(project_id): Path<String>,
 ) -> Html<String> {
     let mut config = state.config.write().await;

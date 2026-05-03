@@ -1,7 +1,7 @@
 use std::sync::Arc;
 use tokio::sync::RwLock;
 
-use minijinja::Environment;
+use minijinja_autoreload::AutoReloader;
 
 use crate::config::AppConfig;
 use crate::services::client_pool::ClientPool;
@@ -10,11 +10,11 @@ use crate::services::client_pool::ClientPool;
 pub struct AppState {
     pub config: Arc<RwLock<AppConfig>>,
     pub clients: ClientPool,
-    pub jinja: Arc<Environment<'static>>,
+    pub jinja: Arc<AutoReloader>,
 }
 
 impl AppState {
-    pub fn new(config: AppConfig, jinja: Environment<'static>) -> Self {
+    pub fn new(config: AppConfig, jinja: AutoReloader) -> Self {
         Self {
             config: Arc::new(RwLock::new(config)),
             clients: ClientPool::new(),
@@ -37,8 +37,11 @@ impl AppState {
     }
 }
 
-pub fn build_template_env(template_dir: &str) -> Environment<'static> {
-    let mut env = Environment::new();
-    env.set_loader(minijinja::path_loader(template_dir));
-    env
+pub fn build_template_env(template_dir: &'static str) -> AutoReloader {
+    AutoReloader::new(move |notifier| {
+        let mut env = minijinja::Environment::new();
+        env.set_loader(minijinja::path_loader(template_dir));
+        notifier.watch_path(template_dir, true);
+        Ok(env)
+    })
 }

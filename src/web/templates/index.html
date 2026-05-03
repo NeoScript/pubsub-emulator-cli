@@ -15,6 +15,7 @@
       <table class="table table-zebra">
         <thead>
           <tr class="border-b border-base-300">
+            <th class="w-5"></th>
             <th class="text-xs uppercase tracking-wider text-base-content/50">Project ID</th>
             <th class="text-xs uppercase tracking-wider text-base-content/50">Emulator Host</th>
             <th></th>
@@ -23,18 +24,27 @@
         <tbody id="project-list">
           {% if projects | length == 0 %}
           <tr id="empty-projects-row">
-            <td colspan="3" class="text-center py-8 text-base-content/40 text-sm">
+            <td colspan="4" class="text-center py-8 text-base-content/40 text-sm">
               No projects yet — add one below.
             </td>
           </tr>
           {% endif %}
           {% for project_id, host in projects %}
           <tr class="hover group">
+            <td class="pl-4 pr-0">
+              <span hx-get="/projects/{{ project_id }}/ping"
+                    hx-trigger="load"
+                    hx-swap="outerHTML">
+                <span class="inline-flex items-center justify-center w-5 h-5">
+                  <span class="loading loading-ring loading-xs text-base-content/20"></span>
+                </span>
+              </span>
+            </td>
             <td>
               <span class="font-mono font-medium text-sm">{{ project_id }}</span>
             </td>
             <td>
-              <span class="text-base-content/60 text-sm font-mono">{{ host }}</span>
+              <span class="text-sm font-mono">{{ host }}</span>
             </td>
             <td class="text-right">
               <div class="flex items-center justify-end gap-2">
@@ -61,7 +71,12 @@
         </tbody>
         <tfoot>
           <tr class="border-t-2 border-base-300 bg-base-200/40">
-            <td class="py-2 pl-4 pr-2">
+            <td class="py-2 pl-4 pr-0">
+              <span class="inline-flex items-center justify-center w-5 h-5">
+                <span class="w-2 h-2 rounded-full bg-base-300"></span>
+              </span>
+            </td>
+            <td class="py-2 pl-0 pr-2">
               <input id="new-project-id"
                      type="text"
                      placeholder="project-id"

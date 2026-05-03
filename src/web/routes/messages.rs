@@ -74,7 +74,8 @@ pub async fn pull_messages(
 
     match crate::services::subscriptions::pull_messages(&client, &subscription, form.max_messages, form.timeout_secs).await {
         Ok(messages) => {
-            let tmpl = state.jinja.get_template("partials/message_card.html").unwrap();
+            let _env = state.jinja.acquire_env().unwrap();
+    let tmpl = _env.get_template("partials/message_card.html").unwrap();
             let rendered: Vec<String> = messages
                 .iter()
                 .map(|m| {
@@ -136,6 +137,7 @@ pub async fn ack_message(
 }
 
 fn render_toast(state: &AppState, message: &str, is_error: bool) -> Html<String> {
-    let tmpl = state.jinja.get_template("partials/toast.html").unwrap();
+    let _env = state.jinja.acquire_env().unwrap();
+    let tmpl = _env.get_template("partials/toast.html").unwrap();
     Html(tmpl.render(context! { message => message, is_error => is_error }).unwrap())
 }

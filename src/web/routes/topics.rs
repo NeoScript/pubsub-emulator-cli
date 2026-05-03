@@ -20,7 +20,8 @@ pub async fn list_topics(
         Err(e) => Err(e),
     };
 
-    let tmpl = state.jinja.get_template("partials/topic_list.html").unwrap();
+    let _env = state.jinja.acquire_env().unwrap();
+    let tmpl = _env.get_template("partials/topic_list.html").unwrap();
     match result {
         Ok(topics) => {
             let short_names: Vec<String> = topics
@@ -68,7 +69,8 @@ pub async fn topic_detail(
     State(state): State<AppState>,
     Path((project, topic)): Path<(String, String)>,
 ) -> Html<String> {
-    let tmpl = state.jinja.get_template("partials/topic_detail.html").unwrap();
+    let _env = state.jinja.acquire_env().unwrap();
+    let tmpl = _env.get_template("partials/topic_detail.html").unwrap();
     Html(tmpl.render(context! {
         topic => &topic,
         project => &project,
@@ -76,6 +78,7 @@ pub async fn topic_detail(
 }
 
 fn render_toast(state: &AppState, message: &str, is_error: bool) -> Html<String> {
-    let tmpl = state.jinja.get_template("partials/toast.html").unwrap();
+    let _env = state.jinja.acquire_env().unwrap();
+    let tmpl = _env.get_template("partials/toast.html").unwrap();
     Html(tmpl.render(context! { message => message, is_error => is_error }).unwrap())
 }

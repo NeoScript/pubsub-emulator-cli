@@ -20,7 +20,8 @@ pub async fn list_subscriptions(
         Err(e) => Err(e),
     };
 
-    let tmpl = state.jinja.get_template("partials/subscription_list.html").unwrap();
+    let _env = state.jinja.acquire_env().unwrap();
+    let tmpl = _env.get_template("partials/subscription_list.html").unwrap();
     match result {
         Ok(subs) => {
             let short_names: Vec<String> = subs
@@ -84,7 +85,8 @@ pub async fn subscription_detail(
     Path((project, subscription)): Path<(String, String)>,
     Query(query): Query<SubDetailQuery>,
 ) -> Html<String> {
-    let tmpl = state.jinja.get_template("partials/subscription_detail.html").unwrap();
+    let _env = state.jinja.acquire_env().unwrap();
+    let tmpl = _env.get_template("partials/subscription_detail.html").unwrap();
     Html(tmpl.render(context! {
         subscription => &subscription,
         project => &project,
@@ -93,6 +95,7 @@ pub async fn subscription_detail(
 }
 
 fn render_toast(state: &AppState, message: &str, is_error: bool) -> Html<String> {
-    let tmpl = state.jinja.get_template("partials/toast.html").unwrap();
+    let _env = state.jinja.acquire_env().unwrap();
+    let tmpl = _env.get_template("partials/toast.html").unwrap();
     Html(tmpl.render(context! { message => message, is_error => is_error }).unwrap())
 }
