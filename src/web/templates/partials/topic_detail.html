@@ -48,6 +48,9 @@
                 hx-on::after-request="if(event.detail.successful) { this.reset(); document.getElementById('attr-rows-{{ topic }}').innerHTML = ''; }"
                 class="flex flex-col gap-3">
 
+            <!-- hidden field that carries serialized attributes -->
+            <input type="hidden" name="attributes" id="attr-hidden-{{ topic }}">
+
             <div>
               <label class="label py-0 mb-1">
                 <span class="label-text text-xs text-base-content/60 uppercase tracking-wider">Message body</span>
@@ -61,7 +64,9 @@
 
             <div>
               <div class="flex items-center justify-between mb-2">
-                <span class="label-text text-xs text-base-content/60 uppercase tracking-wider">Attributes <span class="normal-case font-normal">(optional)</span></span>
+                <span class="label-text text-xs text-base-content/60 uppercase tracking-wider">
+                  Attributes <span class="normal-case font-normal">(optional)</span>
+                </span>
                 <button type="button"
                         class="btn btn-ghost btn-xs gap-1"
                         onclick="addAttrRow('{{ topic }}')">
@@ -71,9 +76,7 @@
                   Add Attribute
                 </button>
               </div>
-              <div id="attr-rows-{{ topic }}" class="flex flex-col gap-1.5">
-                <!-- rows injected by Add Attribute button -->
-              </div>
+              <div id="attr-rows-{{ topic }}" class="flex flex-col gap-1.5"></div>
             </div>
 
             <div class="flex justify-end pt-1">
@@ -93,23 +96,24 @@
 
 </div>
 
-<!-- Attribute row helpers — CSP-safe, no eval -->
+<!-- Attribute row helpers -->
 <template id="attr-row-tpl">
-  <div class="attr-row grid grid-cols-2 gap-1.5">
-    <input type="text" name="attr_keys" placeholder="Key"
+  <div class="attr-row grid grid-cols-[1fr_1fr_auto] gap-1.5 items-center">
+    <input type="text" data-attr-key placeholder="Key"
            class="input input-bordered input-sm font-mono text-xs">
-    <input type="text" name="attr_values" placeholder="Value"
+    <input type="text" data-attr-val placeholder="Value"
            class="input input-bordered input-sm font-mono text-xs">
+    <button type="button" class="btn btn-ghost btn-xs text-error px-1.5"
+            onclick="this.closest('.attr-row').remove()"
+            title="Remove">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </button>
   </div>
 </template>
 
 <script>
-  function attrRowTemplate() {
-    return '<div class="attr-row grid grid-cols-2 gap-1.5">' +
-      '<input type="text" name="attr_keys" placeholder="Key" class="input input-bordered input-sm font-mono text-xs">' +
-      '<input type="text" name="attr_values" placeholder="Value" class="input input-bordered input-sm font-mono text-xs">' +
-      '</div>';
-  }
   function addAttrRow(topicId) {
     var tpl = document.getElementById('attr-row-tpl');
     var container = document.getElementById('attr-rows-' + topicId);
@@ -117,4 +121,23 @@
       container.appendChild(tpl.content.cloneNode(true));
     }
   }
+
+  // Wire up each publish form to serialize attr rows into the hidden field
+  // before HTMX fires the request.
+  document.addEventListener('htmx:configRequest', function(evt) {
+    var form = evt.target;
+    if (!form || !form.id || !form.id.startsWith('publish-form-')) return;
+    var topicId = form.id.replace('publish-form-', '');
+    var hidden = document.getElementById('attr-hidden-' + topicId);
+    var container = document.getElementById('attr-rows-' + topicId);
+    if (!hidden || !container) return;
+
+    var lines = [];
+    container.querySelectorAll('.attr-row').forEach(function(row) {
+      var key = (row.querySelector('[data-attr-key]').value || '').trim();
+      var val = (row.querySelector('[data-attr-val]').value || '').trim();
+      if (key) lines.push(key + '=' + val);
+    });
+    hidden.value = lines.join('\n');
+  });
 </script>

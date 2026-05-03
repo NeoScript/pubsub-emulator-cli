@@ -12,9 +12,7 @@ use crate::web::state::AppState;
 pub struct PublishForm {
     pub data: String,
     #[serde(default)]
-    pub attr_keys: Vec<String>,
-    #[serde(default)]
-    pub attr_values: Vec<String>,
+    pub attributes: String,
 }
 
 #[derive(Deserialize)]
@@ -49,9 +47,12 @@ pub async fn publish_message(
     };
 
     let mut attributes = HashMap::new();
-    for (key, value) in form.attr_keys.iter().zip(form.attr_values.iter()) {
-        if !key.is_empty() {
-            attributes.insert(key.clone(), value.clone());
+    for line in form.attributes.lines() {
+        if let Some((k, v)) = line.splitn(2, '=').collect::<Vec<_>>().as_slice().split_first().and_then(|(k, rest)| rest.first().map(|v| (*k, *v))) {
+            let k = k.trim();
+            if !k.is_empty() {
+                attributes.insert(k.to_string(), v.trim().to_string());
+            }
         }
     }
 
