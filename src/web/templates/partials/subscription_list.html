@@ -1,0 +1,60 @@
+{% if error %}
+<div class="alert alert-error py-2 text-sm mb-3">
+  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126z"/>
+  </svg>
+  <span>{{ error }}</span>
+</div>
+{% endif %}
+
+{% if subscriptions is defined and subscriptions | length == 0 and not error %}
+<!-- Empty state -->
+<div class="flex flex-col items-center gap-2 py-6 text-center">
+  <div class="w-9 h-9 rounded-full bg-base-200 flex items-center justify-center">
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-base-content/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/>
+    </svg>
+  </div>
+  <p class="text-xs text-base-content/40">No subscriptions yet.</p>
+</div>
+{% else %}
+<div class="flex flex-col gap-1 mb-3">
+  {% for sub in subscriptions %}
+  <div class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-base-300 cursor-pointer group border border-transparent hover:border-base-300 transition-all"
+       hx-get="/projects/{{ project }}/subscriptions/{{ sub }}/detail?topic={{ topic }}"
+       hx-target="#detail-panel"
+       hx-swap="innerHTML">
+    <div class="flex items-center gap-2 min-w-0">
+      <div class="w-1.5 h-1.5 rounded-full bg-success shrink-0"></div>
+      <span class="truncate font-mono text-xs">{{ sub }}</span>
+    </div>
+    <button class="btn btn-ghost btn-xs opacity-0 group-hover:opacity-100 text-error shrink-0 h-5 min-h-0 px-1.5 ml-2"
+            hx-delete="/projects/{{ project }}/subscriptions/{{ sub }}/delete"
+            hx-target="closest div.flex"
+            hx-swap="outerHTML"
+            hx-confirm="Delete subscription '{{ sub }}'?"
+            onclick="event.preventDefault(); event.stopPropagation();"
+            title="Delete subscription">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </button>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- Create subscription form -->
+<form hx-post="/projects/{{ project }}/topics/{{ topic }}/subscriptions"
+      hx-target="#subscription-list"
+      hx-swap="innerHTML"
+      class="flex gap-1.5 mt-2">
+  <input type="text" name="name" placeholder="New subscription name"
+         class="input input-bordered input-xs flex-1 font-mono text-xs" required>
+  <button type="submit" class="btn btn-secondary btn-xs shrink-0 gap-1">
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+    </svg>
+    Add
+  </button>
+</form>

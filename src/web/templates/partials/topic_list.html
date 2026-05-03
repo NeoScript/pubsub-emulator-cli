@@ -1,0 +1,65 @@
+{% if error %}
+<div class="alert alert-error mx-2 mb-2 py-2 text-sm">
+  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126z"/>
+  </svg>
+  <span>{{ error }}</span>
+</div>
+{% endif %}
+
+{% if topics is defined and topics | length == 0 and not error %}
+<!-- Empty state -->
+<div class="flex flex-col items-center gap-2 py-8 px-3 text-center">
+  <div class="w-10 h-10 rounded-full bg-base-200 flex items-center justify-center">
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-base-content/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z"/>
+      <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z"/>
+    </svg>
+  </div>
+  <p class="text-xs text-base-content/40 leading-relaxed">No topics yet.<br>Create one below.</p>
+</div>
+{% else %}
+<!-- Topic list -->
+<ul class="menu menu-sm p-0 gap-0.5">
+  {% for topic in topics %}
+  <li>
+    <a class="topic-item flex items-center justify-between rounded-lg px-3 py-2 group"
+       hx-get="/projects/{{ project }}/topics/{{ topic }}/detail"
+       hx-target="#detail-panel"
+       hx-swap="innerHTML"
+       hx-on::after-request="document.querySelectorAll('.topic-item').forEach(el => el.classList.remove('active')); this.classList.add('active');">
+      <span class="truncate font-mono text-xs font-medium">{{ topic }}</span>
+      <button class="btn btn-ghost btn-xs opacity-0 group-hover:opacity-100 text-error shrink-0 h-5 min-h-0 px-1"
+              hx-delete="/projects/{{ project }}/topics/{{ topic }}/delete"
+              hx-target="#topic-list"
+              hx-swap="innerHTML"
+              hx-confirm="Delete topic '{{ topic }}'?"
+              onclick="event.preventDefault(); event.stopPropagation();"
+              title="Delete topic">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </a>
+  </li>
+  {% endfor %}
+</ul>
+{% endif %}
+
+<!-- Create topic form -->
+<div class="px-2 pt-3 mt-auto border-t border-base-300">
+  <form hx-post="/projects/{{ project }}/topics"
+        hx-target="#topic-list"
+        hx-swap="innerHTML"
+        class="flex gap-1.5">
+    <input type="text" name="name" placeholder="New topic name"
+           class="input input-bordered input-xs flex-1 font-mono text-xs" required>
+    <button type="submit"
+            class="btn btn-primary btn-xs shrink-0"
+            title="Create topic">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+      </svg>
+    </button>
+  </form>
+</div>

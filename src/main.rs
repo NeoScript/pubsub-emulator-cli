@@ -8,7 +8,7 @@ use gcloud_pubsub::client::{Client as PubSubClient, ClientConfig};
 mod cli;
 mod config;
 mod services;
-// mod web;
+mod web;
 mod util;
 
 use crate::cli::PubsubCommands;
@@ -20,20 +20,18 @@ async fn main() -> Result<()> {
     let conf: config::AppConfig = confy::load("pubsub-emulator-cli", "config")?;
 
     let cli = Cli::parse();
-    match &cli.commands {
-        PubsubCommands::Topics(cmd) => {
+    match cli.commands {
+        PubsubCommands::Topics(ref cmd) => {
             let pubsub_client = create_pubsub_client(&conf).await?;
             util::handle_topic_commands(cmd, &pubsub_client).await
         }
         PubsubCommands::Init(_init_args) => todo!(),
-        PubsubCommands::Projects(cmd) => {
+        PubsubCommands::Projects(ref cmd) => {
             let _pubsub_client = create_pubsub_client(&conf).await?;
             util::handle_project_commands(cmd, conf).await
         }
         PubsubCommands::Serve(args) => {
-            println!("serve command registered (not yet implemented)");
-            println!("would listen on {}:{}", args.bind, args.port);
-            Ok(())
+            web::server::start(conf, args).await
         }
     }?;
     Ok(())
