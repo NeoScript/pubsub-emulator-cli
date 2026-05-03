@@ -47,7 +47,16 @@
               <span class="font-mono font-medium text-sm">{{ project_id }}</span>
             </td>
             <td>
-              <span class="text-base-content/60 text-sm font-mono">{{ host }}</span>
+              <form hx-put="/projects/{{ project_id }}/host"
+                    hx-target="#toast-container"
+                    hx-swap="innerHTML"
+                    class="join">
+                <input type="text" name="host" value="{{ host }}"
+                       class="input input-bordered input-xs join-item w-40 font-mono">
+                <button type="submit" class="btn btn-xs btn-ghost join-item border border-base-300">
+                  Save
+                </button>
+              </form>
             </td>
             <td class="text-right">
               <div class="flex items-center justify-end gap-2">

@@ -25,6 +25,7 @@ pub async fn start(config: AppConfig, args: ServeArgs) -> anyhow::Result<()> {
         .route("/project", get(routes::pages::project_page))
         .route("/projects", post(routes::pages::add_project))
         .route("/projects/{project}/delete", delete(routes::pages::delete_project))
+        .route("/projects/{project}/host", put(routes::pages::update_project_host))
         .route(
             "/projects/{project}/topics",
             get(routes::topics::list_topics).post(routes::topics::create_topic),
@@ -62,8 +63,6 @@ pub async fn start(config: AppConfig, args: ServeArgs) -> anyhow::Result<()> {
             "/projects/{project}/subscriptions/{subscription}/ack",
             post(routes::messages::ack_message),
         )
-        .route("/settings", get(routes::settings::get_settings))
-        .route("/settings", put(routes::settings::update_settings))
         .nest_service("/static", ServeDir::new("src/web/static"))
         .with_state(state);
 

@@ -18,6 +18,11 @@ pub struct AddProjectForm {
     pub host: String,
 }
 
+#[derive(Deserialize)]
+pub struct UpdateHostForm {
+    pub host: String,
+}
+
 fn default_host() -> String {
     "localhost:8681".to_string()
 }
@@ -103,4 +108,22 @@ pub async fn delete_project(
     let _ = confy::store("pubsub-emulator-cli", "config", &*config);
     drop(config);
     Html(String::new())
+}
+
+pub async fn update_project_host(
+    State(state): State<AppState>,
+    Path(project_id): Path<String>,
+    Form(form): Form<UpdateHostForm>,
+) -> Html<String> {
+    let host = form.host.clone();
+    let mut config = state.config.write().await;
+    config.projects.insert(project_id.clone(), host.clone());
+    let _ = confy::store("pubsub-emulator-cli", "config", &*config);
+    drop(config);
+
+    let tmpl = state.jinja.get_template("partials/toast.html").unwrap();
+    Html(tmpl.render(minijinja::context! {
+        message => format!("Updated {project_id} → {host}"),
+        is_error => false,
+    }).unwrap())
 }
