@@ -48,9 +48,6 @@
                 hx-on::after-request="if(event.detail.successful) { this.reset(); document.getElementById('attr-rows-{{ topic }}').innerHTML = ''; }"
                 class="flex flex-col gap-3">
 
-            <!-- hidden field that carries serialized attributes -->
-            <input type="hidden" name="attributes" id="attr-hidden-{{ topic }}">
-
             <div>
               <label class="label py-0 mb-1">
                 <span class="label-text text-xs text-base-content/60 uppercase tracking-wider">Message body</span>
@@ -122,15 +119,15 @@
     }
   }
 
-  // Wire up each publish form to serialize attr rows into the hidden field
-  // before HTMX fires the request.
+  // Inject serialized attributes directly into HTMX request parameters.
+  // htmx:configRequest fires AFTER form values are already collected, so a
+  // hidden field is always stale — we must write into evt.detail.parameters.
   document.addEventListener('htmx:configRequest', function(evt) {
-    var form = evt.target;
+    var form = evt.detail.elt;
     if (!form || !form.id || !form.id.startsWith('publish-form-')) return;
     var topicId = form.id.replace('publish-form-', '');
-    var hidden = document.getElementById('attr-hidden-' + topicId);
     var container = document.getElementById('attr-rows-' + topicId);
-    if (!hidden || !container) return;
+    if (!container) return;
 
     var lines = [];
     container.querySelectorAll('.attr-row').forEach(function(row) {
@@ -138,6 +135,6 @@
       var val = (row.querySelector('[data-attr-val]').value || '').trim();
       if (key) lines.push(key + '=' + val);
     });
-    hidden.value = lines.join('\n');
+    evt.detail.parameters['attributes'] = lines.join('\n');
   });
 </script>
